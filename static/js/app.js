@@ -36,42 +36,53 @@ function optionChanged() {
         function filterId(individual) {
             return individual.id === dropdownSelection;
         }
-
+        
         var samplesData = importedData.samples;
-
+    
         var filteredId = samplesData.filter(filterId);
+            console.log(filteredId);
         
-        console.log(filteredId);
+            var sampleValuesFiltered = filteredId[0].sample_values.slice(0,10).reverse();
         
-        var sampleOtuIdsNo = filteredId.map(individual =>  individual.otu_ids);
-        var sampleOtuIdsNoText = sampleOtuIdsNo.join().split(',')
-        var sampleOtuIds = sampleOtuIdsNoText.map(i => 'OTU '+i);
+            var sampleIdsFiltered = filteredId[0].otu_ids.slice(0,10).reverse();
+            var sampleIds = sampleIdsFiltered.join().split(',').map(i => 'OTU '+ i);
 
-        var sampleOtuValues = filteredId.map(individual =>  individual.sample_values);
-
-        console.log(sampleOtuIdsNo);
-        console.log(sampleOtuIds);
-        console.log(sampleOtuValues);
+            console.log(sampleIds);
+            console.log(sampleValuesFiltered);
 
         // Create your trace.
-        var traceBar = {
-            x: sampleOtuValues,
-            y: sampleOtuIds,
-            type: "bar"
+        var trace = {
+            x: sampleValuesFiltered,
+            y: sampleIds,
+            type: 'bar',
+            orientation: 'h'
         };
 
         // Create the data array for our plot
-        var dataBar = [traceBar];
+        var data = [trace];
 
         // Define the plot layout
-        var layoutBar = {
-            title: "top 10 OTU results",
+        var layout = {
+            title: "Top 10 OTU results",
             xaxis: { title: "OTU Values" },
             yaxis: { title: "OTU IDs"}
         };
 
-        // Plot the chart to a div tag with id "bar-plot"
-        Plotly.newPlot("bar", dataBar, layoutBar);
+        // Plot the chart to a div tag with id "bar"
+        Plotly.newPlot("bar", data, layout);
+
+        //pull demographic Info by sample
+        var metadataData = importedData.metadata;
+        var filteredMetadata = metadataData.filter(d => d.id.toString() === dropdownSelection)[0];
+        console.log(filteredMetadata);
+        
+        //add demographic Info
+        var demoInfo = d3.select("#sample-metadata");
+        demoInfo.html = ("");
+        
+        Object.entries(filteredMetadata).forEach((key) => {   
+            demoInfo.append("h6").text(key[0] + ": " + key[1] + "\n");
+        });
     });
 };
     
