@@ -77,15 +77,24 @@ function optionChanged() {
 
     //__________________________________________________________________
         // pull data for bubble chart
+
+        var sampleIds = filteredId[0].otu_ids;
+        var sampleValues = filteredId[0].sample_values;
+        var sampleLabels = filteredId[0].otu_labels;
+
+        // console.log(sampleIds);
+        console.log(sampleValues);
+        // console.log(sampleLabels);
+
         var traceBubble = {
-            x: filteredId[0].otu_ids,
-            y: filteredId[0].sample_values,
+            x: sampleIds,
+            y: sampleValues,
             mode: "markers",
             marker: {
-                color: filteredId[0].otu_ids,
-                size: filteredId[0].sample_values
+                color: sampleIds,
+                size: sampleValues,
             },
-            text: filteredId[0].otu_labels
+            text: sampleLabels
         };
 
         var dataBubble = [traceBubble];
@@ -105,7 +114,6 @@ function optionChanged() {
         //add demographic Info
         var demoInfo = d3.select("#sample-metadata");
         demoInfo.html("");
-        console.log(demoInfo);
             
         Object.entries(filteredMetadata).forEach((key) => {   
             demoInfo.append("h6").text(key[0] + ": " + key[1] + "\n");
