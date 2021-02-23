@@ -17,28 +17,37 @@ function init() {
             select.appendChild(individual);
         }
 
+    d3.select("#selDataset").node().value = options[0];
+    console.log(options[0])
+
+    d3.json("samples.json").then((importedData)=> {
+        function filterId(individual) {
+            return individual.id === options[0];
+        }
+
+        var samplesData = importedData.samples;
     
-        d3.select("#selDataset").node().value = options[0];
+        var filteredId = samplesData.filter(filterId);
+            console.log(filteredId);
+    
         optionChanged();
+    });
     });
 };
 
 function optionChanged() {
-    // create variable for drop down selection of ID
-    var dropdownSel = d3.select("#selDataset").node().value; 
-    if (typeof(dropdownSel) != "undefined") {
-        dropdownSelection = '940'
-    }
+    var dropdownSelection = d3.select("#selDataset").node().value; 
 
     d3.json("samples.json").then((importedData)=> {
         function filterId(individual) {
             return individual.id === dropdownSelection;
         }
-        
+
         var samplesData = importedData.samples;
     
         var filteredId = samplesData.filter(filterId);
             console.log(filteredId);
+
     //__________________________________________________________________
         // bar plot data transformation
             var sampleValuesFiltered = filteredId[0].sample_values.slice(0,10).reverse();
@@ -113,8 +122,73 @@ function optionChanged() {
         Object.entries(filteredMetadata).forEach((key) => {   
             demoInfo.append("h6").text(key[0] + ": " + key[1] + "\n");
         });
-    });
+    //__________________________________________________________________
+        //pull bonus guage chart
+        var wfreqSample = filteredMetadata.wfreq;
+        console.log(wfreqSample)
+
+    // Trig to calc meter point
+    var degrees = 10 - wfreqSample,
+	    radius = .5;
+    var radians = degrees * Math.PI / 10;
+    var x = radius * Math.cos(radians);
+    var y = radius * Math.sin(radians);
+
+    // Path: may have to change to create a better triangle
+    var mainPath = 'M -.0 -0.02 L .0 0.02 L ',
+	    pathX = String(x),
+	    space = ' ',
+	    pathY = String(y),
+	    pathEnd = ' Z';
+    var path = mainPath.concat(pathX,space,pathY,pathEnd);
+
+    var data = [{ type: 'scatter',
+        x: [0], y:[0],
+	    marker: {size: 20, color:'850000'},
+	    showlegend: false,
+	    name: 'wfreq',
+	    text: wfreqSample,
+	    hoverinfo: 'text+name'},
+    { values: [50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50],
+    rotation: 90,
+    text: ['8-9','7-8', '6-7','5-6','4-5','3-4','2-3','1-2','1-0', ''],
+    textinfo: 'text',
+    textposition:'inside',	  
+    marker: {colors:['rgba(14, 127, 0, .5)', 'rgba(110, 154, 22, .5)',
+						 'rgba(170, 202, 42, .5)', 
+                         'rgba(202, 209, 60, .5)', 'rgba(202, 209, 95, .5)',
+						 'rgba(210, 206, 120, .5)','rgba(210, 206, 145, .5)',
+                          'rgba(232, 226, 202, .5)','rgba(232, 226, 230, .5)',
+						 'rgba(255, 255, 255, 0)']},
+    labels: ['8-9', '7-8', '6-7','5-6','4-5','3-4','2-3','1-2','1-0', ''],
+    hoverinfo: 'label',
+    hole: .5,
+    type: 'pie',
+    showlegend: false
+}];
+
+var layout = {
+    shapes:[{
+        type: 'path',
+        path: path,
+        fillcolor: '850000',
+        line: {
+        color: '850000'
+        }
+    }],
+    title: '<b>Belly Button Washing Frequency</b> <br> scrubs per Week',
+    height: 500,
+    width: 500,
+    xaxis: {zeroline:false, showticklabels:false,
+			 showgrid: false, range: [-1, 1]},
+    yaxis: {zeroline:false, showticklabels:false,
+			 showgrid: false, range: [-1, 1]}
 };
+
+Plotly.newPlot('gauge', data, layout, {showSendToCloud:true});
+});
+};
+
 
 // run to initially load page
 init();
